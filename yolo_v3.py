@@ -1,4 +1,4 @@
-"""Contains Yolo core definitions."""
+
 
 import tensorflow as tf
 
@@ -44,15 +44,18 @@ def fixed_padding(inputs, kernel_size, data_format):
     return padded_inputs
 
 
-def conv2d_fixed_padding(inputs, filters, kernel_size, data_format, strides=1):
+def conv2d_fixed_padding(inputs, filters, kernel_size, data_format, training, strides=1):
     """Strided 2-D convolution with explicit padding."""
     if strides > 1:
         inputs = fixed_padding(inputs, kernel_size, data_format)
 
-    return tf.layers.conv2d(
+    inputs = tf.layers.conv2d(
         inputs=inputs, filters=filters, kernel_size=kernel_size,
         strides=strides, padding=('SAME' if strides == 1 else 'VALID'),
-        use_bias=False, data_format=data_format)
+        data_format=data_format, use_bias=False)
+    inputs = batch_norm(inputs, training=training, data_format=data_format)
+    inputs = tf.nn.leaky_relu(inputs, alpha=_LEAKY_RELU)
+    return inputs
 
 
 def darknet53_residual_block(inputs, filters, training, data_format,

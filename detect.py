@@ -22,7 +22,7 @@ def main(mode, iou_threshold, confidence_threshold, input_names):
     if mode == 'images':
         batch_size = len(input_names)
         batch = load_images(input_names, model_size=_MODEL_SIZE)
-        # For TensorFlow 1.x, tf.placeholder is used. (If using TF 2.x, consider using tf.compat.v1.placeholder)
+        # Using TF 1.x placeholder. If you are on TF 2.x, consider tf.compat.v1.placeholder.
         inputs = tf.placeholder(tf.float32, [batch_size, *_MODEL_SIZE, 3])
         detections = model(inputs, training=False)
         saver = tf.train.Saver(tf.global_variables(scope='yolo_v3_model'))
@@ -35,10 +35,15 @@ def main(mode, iou_threshold, confidence_threshold, input_names):
         print('Detections have been saved successfully.')
 
     elif mode == 'video':
-        # Ensure that at least one video file is provided
         if len(input_names) < 1:
-            print("Error: For video mode, please provide a video file path.")
+            print("Error: For video mode, please provide a video file path or camera index.")
             sys.exit(1)
+
+        # If the provided video input is a digit, assume it's a camera index and convert it to an integer.
+        video_input = input_names[0]
+        if video_input.isdigit():
+            video_input = int(video_input)
+
         inputs = tf.placeholder(tf.float32, [1, *_MODEL_SIZE, 3])
         detections = model(inputs, training=False)
         saver = tf.train.Saver(tf.global_variables(scope='yolo_v3_model'))
@@ -48,7 +53,12 @@ def main(mode, iou_threshold, confidence_threshold, input_names):
 
             win_name = 'Video detection'
             cv2.namedWindow(win_name)
-            cap = cv2.VideoCapture(input_names[0])
+
+            cap = cv2.VideoCapture(video_input)
+            if not cap.isOpened():
+                print("Error: Cannot open video/camera stream!")
+                sys.exit(1)
+
             frame_size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH),
                           cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fourcc = cv2.VideoWriter_fourcc(*'X264')
@@ -61,6 +71,7 @@ def main(mode, iou_threshold, confidence_threshold, input_names):
                     ret, frame = cap.read()
                     if not ret:
                         break
+
                     resized_frame = cv2.resize(frame, dsize=_MODEL_SIZE[::-1],
                                                interpolation=cv2.INTER_NEAREST)
                     detection_result = sess.run(detections,
@@ -78,20 +89,18 @@ def main(mode, iou_threshold, confidence_threshold, input_names):
                 cv2.destroyAllWindows()
                 cap.release()
                 print('Detections have been saved successfully.')
-
     else:
         raise ValueError("Inappropriate mode. Please choose either 'video' or 'images'.")
 
 
 if __name__ == '__main__':
-    # Check for the minimum required arguments:
-    #   sys.argv[0] -> script name
-    #   sys.argv[1] -> mode ('images' or 'video')
-    #   sys.argv[2] -> iou_threshold (float)
-    #   sys.argv[3] -> confidence_threshold (float)
-    #   sys.argv[4:] -> one or more input file(s)
+    # Expected arguments:
+    #   sys.argv[1]: mode ('images' or 'video')
+    #   sys.argv[2]: iou_threshold (float)
+    #   sys.argv[3]: confidence_threshold (float)
+    #   sys.argv[4:]: input file(s) or camera index (for video)
     if len(sys.argv) < 5:
-        print("Usage: python detect.py <mode: images|video> <iou_threshold> <confidence_threshold> <input_file(s)>")
+        print("Usage: python detect.py <mode: images|video> <iou_threshold> <confidence_threshold> <input_file(s)/camera_index>")
         sys.exit(1)
 
     mode = sys.argv[1]

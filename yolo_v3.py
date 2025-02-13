@@ -18,17 +18,7 @@ def batch_norm(inputs, training, data_format):
 
 
 def fixed_padding(inputs, kernel_size, data_format):
-    """ResNet implementation of fixed padding.
-
-    Pads the input along the spatial dimensions independently of input size.
-
-    Args:
-        inputs: Tensor input to be padded.
-        kernel_size: The kernel to be used in the conv2d or max_pool2d.
-        data_format: The input format.
-    Returns:
-        A tensor with the same format as the input.
-    """
+    
     pad_total = kernel_size - 1
     pad_beg = pad_total // 2
     pad_end = pad_total - pad_beg

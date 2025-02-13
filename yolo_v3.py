@@ -11,7 +11,6 @@ _ANCHORS = [(10, 13), (16, 30), (33, 23),
 
 
 def batch_norm(inputs, training, data_format):
-    """Performs a batch normalization using a standard set of parameters."""
     return tf.layers.batch_normalization(
         inputs=inputs, axis=1 if data_format == 'channels_first' else 3,
         momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON,

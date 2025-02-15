@@ -334,20 +334,20 @@ class Yolo_v3:
         self.confidence_threshold = confidence_threshold
         self.data_format = data_format
 
-    def __call__(self, inputs, training):
-        """Add operations to detect boxes for a batch of input images.
+def __call__(self, inputs, training):
+    """Add operations to detect boxes for a batch of input images.
 
-        Args:
-            inputs: A Tensor representing a batch of input images.
-            training: A boolean, whether to use in training or inference mode.
+    Args:
+        inputs: A Tensor representing a batch of input images.
+        training: A boolean, whether to use in training or inference mode.
 
-        Returns:
-            A list containing class-to-boxes dictionaries
-                for each sample in the batch.
-        """
-        with tf.variable_scope('yolo_v3_model'):
-            if self.data_format == 'channels_first':
-                inputs = tf.transpose(inputs, [0, 3, 1, 2])
+    Returns:
+        A list containing class-to-boxes dictionaries
+            for each sample in the batch.
+    """
+    with tf.compat.v1.variable_scope('yolo_v3_model'):
+        if self.data_format == 'channels_first':
+            inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
             inputs = inputs / 255
 

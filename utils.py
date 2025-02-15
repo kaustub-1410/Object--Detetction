@@ -1,4 +1,4 @@
-"""Contains utility functions for Yolo v3 model."""
+
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -7,15 +7,7 @@ import cv2
 
 
 def load_images(img_names, model_size):
-    """Loads images in a 4D array.
-    Args:
-        img_names: A list of images names.
-        model_size: The input size of the model.
-        data_format: A format for the array returned
-            ('channels_first' or 'channels_last').
-    Returns:
-        A 4D NumPy array.
-    """
+    
     imgs = []
 
     for img_name in img_names:
